@@ -13,12 +13,12 @@ package proyecto;
 public class TablaHash {
     private NodoTabla[] tabla;
     private int capacidad;
-    private int tamano;
+    private int tamaño;
 
     public TablaHash(int capacidad) {
         this.capacidad = capacidad;
         this.tabla = new NodoTabla[capacidad];
-        this.tamano = 0;
+        this.tamaño = 0;
     }
 
     private int funcionHash(String clave) {
@@ -44,7 +44,7 @@ public class TablaHash {
         NodoTabla nuevoNodo = new NodoTabla(clave, valor);
         nuevoNodo.setSiguiente(tabla[indice]);
         tabla[indice] = nuevoNodo;
-        tamano++;
+        tamaño++;
     }
     
     public Estacion buscar(String clave) {
