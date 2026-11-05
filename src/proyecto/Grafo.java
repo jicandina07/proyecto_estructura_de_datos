@@ -63,7 +63,7 @@ public class Grafo {
     public void eliminarEstacion(String idEstacion) {
         Estacion estacion = buscarPorId(idEstacion);
         if (estacion != null) {
-            for (int i = 0; i < estaciones.getTamano(); i++) {
+            for (int i = 0; i < estaciones.getTamaño(); i++) {
                 Estacion otra = (Estacion) estaciones.obtener(i);
                 eliminarConexionEntre(otra, idEstacion);
             }
@@ -96,7 +96,7 @@ public class Grafo {
     private void eliminarConexionEntre(Estacion estacion, String idDestino) {
         ListaEnlazada conexiones = estacion.getConexiones();
         if (conexiones != null) {
-            for (int i = 0; i < conexiones.getTamano(); i++) {
+            for (int i = 0; i < conexiones.getTamaño(); i++) {
                 Conexion con = (Conexion) conexiones.obtener(i);
                 if (con.getDestino().getId().equals(idDestino)) {
                     conexiones.eliminarEn(i);
