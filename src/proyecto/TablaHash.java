@@ -25,7 +25,7 @@ public class TablaHash {
         char[] arrCodigo = clave.trim().toLowerCase().toCharArray();
         int codigo = 0;
         for (int i=0; i< arrCodigo.length - 1; i++){
-            codigo = codigo + (arrCodigo[i]*20^(arrCodigo.length - (i+1)));
+            codigo = (31 * codigo + clave.charAt(i)) % capacidad;
         }
         int Indice = codigo % this.capacidad;
         return Math.abs(Indice);
