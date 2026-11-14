@@ -9,16 +9,54 @@ package proyecto;
  * @author josei
  */
 public class VentanaConexiones extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VentanaConexiones.class.getName());
+    private ControladorRed controlador;
+    private VentanaPrincipal principal;
 
-    /**
-     * Creates new form VentanaConexiones
-     */
-    public VentanaConexiones() {
+    public VentanaConexiones(ControladorRed controlador, VentanaPrincipal principal) {
         initComponents();
+        this.controlador = controlador;
+        this.principal = principal;
+        this.setLocationRelativeTo(null);
+        cargarCombo();
+        cargarTabla(null);
     }
 
+    public void cargarCombo() {
+        javax.swing.DefaultComboBoxModel modelo = new javax.swing.DefaultComboBoxModel();
+        ListaEnlazada estaciones = controlador.getGrafo().getEstaciones();
+        for (int i = 0; i < estaciones.getTamaño(); i++) {
+            Estacion est = (Estacion) estaciones.obtener(i);
+            modelo.addElement(est.getId() + " - " + est.getNombre());
+        }
+        comboEstaciones.setModel(modelo);
+    }
+
+    public void cargarTabla(String idFiltro) {
+        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tablaEstaciones.getModel();
+        modelo.setRowCount(0);
+        ListaEnlazada estaciones = controlador.getGrafo().getEstaciones();
+        ListaEnlazada mostradas = new ListaEnlazada();
+
+        for (int i = 0; i < estaciones.getTamaño(); i++) {
+            Estacion origen = (Estacion) estaciones.obtener(i);
+            ListaEnlazada conexiones = origen.getConexiones();
+            for (int j = 0; j < conexiones.getTamaño(); j++) {
+                Conexion con = (Conexion) conexiones.obtener(j);
+                String idA = origen.getId();
+                String idB = con.getDestino().getId();
+                String par1 = idA + "-" + idB;
+                String par2 = idB + "-" + idA;
+
+                if (!mostradas.contiene(par1) && !mostradas.contiene(par2)) {
+                    if (idFiltro == null || idA.equals(idFiltro) || idB.equals(idFiltro)) {
+                        Object[] fila = {idA, idB, con.getTiempoMinutos()};
+                        modelo.addRow(fila);
+                        mostradas.agregar(par1);
+                    }
+                }
+            }
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -39,7 +77,7 @@ public class VentanaConexiones extends javax.swing.JFrame {
         btnAgregar = new javax.swing.JButton();
         btnEliminar = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabel1.setText("UrbanRoute - Conexiones");
 
@@ -48,8 +86,10 @@ public class VentanaConexiones extends javax.swing.JFrame {
         comboEstaciones.setToolTipText("");
 
         btnFiltrar.setText("Filtrar");
+        btnFiltrar.addActionListener(this::btnFiltrarActionPerformed);
 
         btnMostrarTodas.setText("Mostrar Todas");
+        btnMostrarTodas.addActionListener(this::btnMostrarTodasActionPerformed);
 
         jLabel3.setText("Cada conexion permite viajar en ambos sentidos");
 
@@ -72,8 +112,10 @@ public class VentanaConexiones extends javax.swing.JFrame {
         jScrollPane1.setViewportView(tablaEstaciones);
 
         btnAgregar.setText("Agregar conexión");
+        btnAgregar.addActionListener(this::btnAgregarActionPerformed);
 
         btnEliminar.setText("Eliminar seleccionada");
+        btnEliminar.addActionListener(this::btnEliminarActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -130,30 +172,39 @@ public class VentanaConexiones extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
+    private void btnFiltrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFiltrarActionPerformed
+        // TODO add your handling code here:
+        if (comboEstaciones.getSelectedItem() != null) {
+            String seleccion = comboEstaciones.getSelectedItem().toString();
+            String id = seleccion.split(" - ")[0].trim();
+            cargarTabla(id);
         }
-        //</editor-fold>
+    }//GEN-LAST:event_btnFiltrarActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new VentanaConexiones().setVisible(true));
-    }
+    private void btnMostrarTodasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarTodasActionPerformed
+        // TODO add your handling code here:
+        cargarTabla(null);
+    }//GEN-LAST:event_btnMostrarTodasActionPerformed
+
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        // TODO add your handling code here:
+        new VentanaAgregarConexion(controlador, this, principal).setVisible(true);
+    }//GEN-LAST:event_btnAgregarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        // TODO add your handling code here:
+        int fila = tablaEstaciones.getSelectedRow();
+        if (fila == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Seleccione una conexion de la tabla.");
+            return;
+        }
+        String idA = tablaEstaciones.getValueAt(fila, 0).toString();
+        String idB = tablaEstaciones.getValueAt(fila, 1).toString();
+        controlador.eliminarConexion(idA, idB);
+        cargarTabla(null);
+        if (principal != null) principal.actualizarMapa();
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAgregar;

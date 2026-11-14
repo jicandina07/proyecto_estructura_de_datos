@@ -9,14 +9,46 @@ package proyecto;
  * @author josei
  */
 public class VentanaSubredes extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VentanaSubredes.class.getName());
+    private ControladorRed controlador;
+    private ListaEnlazada subredesDetectadas;
 
-    /**
-     * Creates new form VentanaHubs
-     */
-    public VentanaSubredes() {
+    public VentanaSubredes(ControladorRed controlador) {
         initComponents();
+        this.controlador = controlador;
+        this.setLocationRelativeTo(null);
+        areaEstaciones.setEditable(false);
+        calcularSubredes();
+
+        tablaSubredes.getSelectionModel().addListSelectionListener(e -> {
+            int fila = tablaSubredes.getSelectedRow();
+            if (fila != -1 && subredesDetectadas != null) {
+                ListaEnlazada subred = (ListaEnlazada) subredesDetectadas.obtener(fila);
+                String texto = "";
+                for (int i = 0; i < subred.getTamaño(); i++) {
+                    Estacion est = (Estacion) subred.obtener(i);
+                    texto = texto + "- " + est.getId() + ": " + est.getNombre() + " (" + est.getLinea() + ")\n";
+                }
+                areaEstaciones.setText(texto);
+            }
+        });
+    }
+
+    private void calcularSubredes() {
+        subredesDetectadas = controlador.obtenerSubredes();
+        lblTotalSubredes.setText("Total de subredes detectadas: " + subredesDetectadas.getTamaño());
+        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tablaSubredes.getModel();
+        modelo.setRowCount(0);
+        areaEstaciones.setText("");
+
+        for (int i = 0; i < subredesDetectadas.getTamaño(); i++) {
+            ListaEnlazada grupo = (ListaEnlazada) subredesDetectadas.obtener(i);
+            String estado = "Conectada";
+            if (grupo.getTamaño() == 1) {
+                estado = "Estacion Aislada";
+            }
+            Object[] fila = {"Subred " + (i + 1), grupo.getTamaño(), estado};
+            modelo.addRow(fila);
+        }
     }
 
     /**
@@ -73,10 +105,13 @@ public class VentanaSubredes extends javax.swing.JFrame {
         jScrollPane2.setViewportView(areaEstaciones);
 
         jButton1.setText("Actualizar");
+        jButton1.addActionListener(this::jButton1ActionPerformed);
 
         btnRecalcular.setText("Recalcular");
+        btnRecalcular.addActionListener(this::btnRecalcularActionPerformed);
 
         btnCerrar.setText("Cerrar");
+        btnCerrar.addActionListener(this::btnCerrarActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -142,30 +177,21 @@ public class VentanaSubredes extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        calcularSubredes();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new VentanaSubredes().setVisible(true));
-    }
+    private void btnRecalcularActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRecalcularActionPerformed
+        // TODO add your handling code here:
+        calcularSubredes();
+    }//GEN-LAST:event_btnRecalcularActionPerformed
+
+    private void btnCerrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+    }//GEN-LAST:event_btnCerrarActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea areaEstaciones;

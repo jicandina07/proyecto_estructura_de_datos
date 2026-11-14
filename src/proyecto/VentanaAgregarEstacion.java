@@ -84,8 +84,10 @@ public class VentanaAgregarEstacion extends javax.swing.JFrame {
         txtMinutos.addActionListener(this::txtMinutosActionPerformed);
 
         btnGuardar.setText("Guardar");
+        btnGuardar.addActionListener(this::btnGuardarActionPerformed);
 
         btnCancelar.setText("Cancelar");
+        btnCancelar.addActionListener(this::btnCancelarActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -192,30 +194,58 @@ public class VentanaAgregarEstacion extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtMinutosActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+    private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
+        // TODO add your handling code here:
+        String id = txtID.getText().trim();
+        String nombre = txtNombre.getText().trim();
+        String linea = txtLinea.getText().trim();
+        String zona = txtZona.getText().trim();
+        String capTexto = txtCapacidad.getText().trim();
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new VentanaAgregarEstacion().setVisible(true));
-    }
+        if (id.isEmpty() || nombre.isEmpty() || linea.isEmpty() || zona.isEmpty() || capTexto.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Complete todos los campos de la estacion.");
+            return;
+        }
+
+        int capacidad = 0;
+        try {
+            capacidad = Integer.parseInt(capTexto);
+            if (capacidad <= 0) {
+                javax.swing.JOptionPane.showMessageDialog(this, "La capacidad debe ser mayor a 0.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            javax.swing.JOptionPane.showMessageDialog(this, "La capacidad debe ser un numero entero.");
+            return;
+        }
+
+        boolean creada = controlador.agregarEstacion(id, nombre, linea, zona, capacidad);
+        if (!creada) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Ya existe una estacion con ese ID o Nombre.");
+            return;
+        }
+
+        String seleccion = comboEstacionDestino.getSelectedItem().toString();
+        String minTexto = txtMinutos.getText().trim();
+        if (!seleccion.equals("Ninguna") && !minTexto.isEmpty()) {
+            try {
+                int minutos = Integer.parseInt(minTexto);
+                String idDestino = seleccion.split(" - ")[0].trim();
+                controlador.agregarConexion(id, idDestino, minutos);
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Estacion creada, pero los minutos de conexion no eran validos.");
+            }
+        }
+
+        if (ventanaEstaciones != null) ventanaEstaciones.cargarTabla();
+        if (principal != null) principal.actualizarMapa();
+        this.dispose();
+    }//GEN-LAST:event_btnGuardarActionPerformed
+
+    private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+    }//GEN-LAST:event_btnCancelarActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelar;

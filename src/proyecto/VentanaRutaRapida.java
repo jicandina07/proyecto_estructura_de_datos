@@ -9,14 +9,37 @@ package proyecto;
  * @author josei
  */
 public class VentanaRutaRapida extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VentanaRutaRapida.class.getName());
+    private ControladorRed controlador;
+    private VentanaPrincipal principal;
+    private ListaEnlazada ultimaRuta;
+    private javax.swing.JTextArea areaResultado;
 
-    /**
-     * Creates new form VentanaRutaRapida
-     */
-    public VentanaRutaRapida() {
+    public VentanaRutaRapida(ControladorRed controlador, VentanaPrincipal principal) {
         initComponents();
+        this.controlador = controlador;
+        this.principal = principal;
+        this.setLocationRelativeTo(null);
+        
+        areaResultado = new javax.swing.JTextArea();
+        areaResultado.setEditable(false);
+        jPanel1.setLayout(new java.awt.BorderLayout());
+        jPanel1.add(new javax.swing.JScrollPane(areaResultado), java.awt.BorderLayout.CENTER);
+        
+        cargarCombos();
+    }
+
+    private void cargarCombos() {
+        javax.swing.DefaultComboBoxModel modOrigen = new javax.swing.DefaultComboBoxModel();
+        javax.swing.DefaultComboBoxModel modDestino = new javax.swing.DefaultComboBoxModel();
+        ListaEnlazada estaciones = controlador.getGrafo().getEstaciones();
+        for (int i = 0; i < estaciones.getTamaño(); i++) {
+            Estacion est = (Estacion) estaciones.obtener(i);
+            String texto = est.getId() + " - " + est.getNombre();
+            modOrigen.addElement(texto);
+            modDestino.addElement(texto);
+        }
+        comboOrigen.setModel(modOrigen);
+        comboDestino.setModel(modDestino);
     }
 
     /**
@@ -48,6 +71,7 @@ public class VentanaRutaRapida extends javax.swing.JFrame {
         jLabel3.setText("Destino");
 
         btnCalcular.setText("Calcular ruta");
+        btnCalcular.addActionListener(this::btnCalcularActionPerformed);
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -63,10 +87,13 @@ public class VentanaRutaRapida extends javax.swing.JFrame {
         );
 
         btnCerrar.setText("Cerrar");
+        btnCerrar.addActionListener(this::btnCerrarActionPerformed);
 
         btnNueva.setText("Nueva consulta");
+        btnNueva.addActionListener(this::btnNuevaActionPerformed);
 
         btnMostrar.setText("Mostrar ruta en mapa");
+        btnMostrar.addActionListener(this::btnMostrarActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -129,30 +156,49 @@ public class VentanaRutaRapida extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
+    private void btnCalcularActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCalcularActionPerformed
+        // TODO add your handling code here:
+        if (comboOrigen.getSelectedItem() == null || comboDestino.getSelectedItem() == null) {
+            return;
         }
-        //</editor-fold>
+        String idOrigen = comboOrigen.getSelectedItem().toString().split(" - ")[0].trim();
+        String idDestino = comboDestino.getSelectedItem().toString().split(" - ")[0].trim();
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new VentanaRutaRapida().setVisible(true));
-    }
+        ultimaRuta = controlador.calcularRutaMinima(idOrigen, idDestino);
+        if (ultimaRuta == null) {
+            areaResultado.setText("No existe camino conectado entre estas dos estaciones.");
+            return;
+        }
+
+        int tiempoTotal = controlador.calcularTiempoRuta(ultimaRuta);
+        String textoRuta = "Tiempo total estimado: " + tiempoTotal + " minutos\n\nRecorrido:\n";
+        for (int i = 0; i < ultimaRuta.getTamaño(); i++) {
+            Estacion est = (Estacion) ultimaRuta.obtener(i);
+            textoRuta = textoRuta + (i + 1) + ". " + est.getNombre() + " (" + est.getLinea() + ")\n";
+        }
+        areaResultado.setText(textoRuta);
+    }//GEN-LAST:event_btnCalcularActionPerformed
+
+    private void btnMostrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarActionPerformed
+        // TODO add your handling code here:
+        if (ultimaRuta != null && principal != null) {
+            principal.mostrarRutaEnMapa(ultimaRuta);
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Primero calcule una ruta valida.");
+        }
+    }//GEN-LAST:event_btnMostrarActionPerformed
+
+    private void btnNuevaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNuevaActionPerformed
+        // TODO add your handling code here:
+        ultimaRuta = null;
+        areaResultado.setText("");
+        if (principal != null) principal.actualizarMapa();
+    }//GEN-LAST:event_btnNuevaActionPerformed
+
+    private void btnCerrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+    }//GEN-LAST:event_btnCerrarActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCalcular;

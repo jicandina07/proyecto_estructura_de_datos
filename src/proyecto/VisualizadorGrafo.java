@@ -6,6 +6,8 @@ package proyecto;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import javax.swing.JPanel;
@@ -21,6 +23,7 @@ public class VisualizadorGrafo extends JPanel {
 
     public VisualizadorGrafo() {
         this.setBackground(Color.WHITE);
+        this.setPreferredSize(new Dimension(780, 580));
     }
 
     public void setGrafo(Grafo grafo) {
@@ -44,6 +47,8 @@ public class VisualizadorGrafo extends JPanel {
         }
 
         Graphics2D g2 = (Graphics2D) g;
+        g2.setFont(new Font("Arial", Font.PLAIN, 10));
+
         ListaEnlazada estaciones = grafo.getEstaciones();
         int total = estaciones.getTamaño();
 
@@ -52,10 +57,7 @@ public class VisualizadorGrafo extends JPanel {
 
         int centroX = getWidth() / 2;
         int centroY = getHeight() / 2;
-        int radio = Math.min(centroX, centroY) - 35;
-        if (radio < 40) {
-            radio = 40;
-        }
+        int radio = 210;
 
         for (int i = 0; i < total; i++) {
             double angulo = (2 * Math.PI * i) / total;
@@ -75,31 +77,46 @@ public class VisualizadorGrafo extends JPanel {
                         g2.setColor(Color.RED);
                         g2.setStroke(new BasicStroke(3));
                     } else {
-                        g2.setColor(Color.LIGHT_GRAY);
+                        g2.setColor(new Color(210, 210, 210));
                         g2.setStroke(new BasicStroke(1));
                     }
                     g2.drawLine(posX[i], posY[i], posX[idxDestino], posY[idxDestino]);
 
-                    int midX = (posX[i] + posX[idxDestino]) / 2;
-                    int midY = (posY[i] + posY[idxDestino]) / 2;
-                    g2.setColor(Color.DARK_GRAY);
-                    g2.drawString(con.getTiempoMinutos() + "m", midX, midY);
+                    if (enRuta || total <= 20) {
+                        int midX = (posX[i] + posX[idxDestino]) / 2;
+                        int midY = (posY[i] + posY[idxDestino]) / 2;
+                        g2.setColor(Color.DARK_GRAY);
+                        g2.drawString(con.getTiempoMinutos() + "m", midX, midY);
+                    }
                 }
             }
         }
 
         for (int i = 0; i < total; i++) {
             Estacion est = (Estacion) estaciones.obtener(i);
+            double angulo = (2 * Math.PI * i) / total;
+
             if (estaEnRuta(est.getId())) {
                 g2.setColor(Color.RED);
             } else {
                 g2.setColor(new Color(0, 102, 204));
             }
-            g2.fillOval(posX[i] - 12, posY[i] - 12, 24, 24);
+            g2.fillOval(posX[i] - 9, posY[i] - 9, 18, 18);
+
             g2.setColor(Color.WHITE);
-            g2.drawString(est.getId(), posX[i] - 9, posY[i] + 4);
+            g2.setFont(new Font("Arial", Font.BOLD, 8));
+            g2.drawString(est.getId(), posX[i] - 7, posY[i] + 3);
+
+            int distanciaTexto = radio + 18;
+            if (i % 2 != 0) {
+                distanciaTexto = radio + 36;
+            }
+            int textX = centroX + (int) (distanciaTexto * Math.cos(angulo)) - 20;
+            int textY = centroY + (int) (distanciaTexto * Math.sin(angulo)) + 4;
+
             g2.setColor(Color.BLACK);
-            g2.drawString(est.getNombre(), posX[i] - 20, posY[i] - 15);
+            g2.setFont(new Font("Arial", Font.PLAIN, 9));
+            g2.drawString(est.getNombre(), textX, textY);
         }
     }
 
@@ -114,16 +131,22 @@ public class VisualizadorGrafo extends JPanel {
     }
 
     private boolean estaEnRuta(String id) {
-        if (rutaResaltada == null) return false;
+        if (rutaResaltada == null) {
+            return false;
+        }
         for (int i = 0; i < rutaResaltada.getTamaño(); i++) {
             Estacion e = (Estacion) rutaResaltada.obtener(i);
-            if (e.getId().equals(id)) return true;
+            if (e.getId().equals(id)) {
+                return true;
+            }
         }
         return false;
     }
 
     private boolean esTramoDeRuta(String idA, String idB) {
-        if (rutaResaltada == null) return false;
+        if (rutaResaltada == null) {
+            return false;
+        }
         for (int i = 0; i < rutaResaltada.getTamaño() - 1; i++) {
             Estacion actual = (Estacion) rutaResaltada.obtener(i);
             Estacion sig = (Estacion) rutaResaltada.obtener(i + 1);

@@ -133,6 +133,9 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Calcular ruta"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCalcularActionPerformed"/>
+      </Events>
     </Component>
     <Container class="javax.swing.JPanel" name="jPanel1">
       <Properties>
@@ -158,16 +161,25 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Cerrar"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCerrarActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="btnNueva">
       <Properties>
         <Property name="text" type="java.lang.String" value="Nueva consulta"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnNuevaActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="btnMostrar">
       <Properties>
         <Property name="text" type="java.lang.String" value="Mostrar ruta en mapa"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnMostrarActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

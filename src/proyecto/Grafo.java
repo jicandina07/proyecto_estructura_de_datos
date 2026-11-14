@@ -68,6 +68,8 @@ public class Grafo {
                 eliminarConexionEntre(otra, idEstacion);
             }
             estaciones.eliminar(estacion);
+            tablaPorId.eliminar(estacion.getId());
+            tablaPorNombre.eliminar(estacion.getNombre());
         }
     }
 

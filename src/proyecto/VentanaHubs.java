@@ -9,14 +9,47 @@ package proyecto;
  * @author josei
  */
 public class VentanaHubs extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VentanaHubs.class.getName());
+    private ControladorRed controlador;
 
-    /**
-     * Creates new form VentanaHubs
-     */
-    public VentanaHubs() {
+    public VentanaHubs(ControladorRed controlador) {
         initComponents();
+        this.controlador = controlador;
+        this.setLocationRelativeTo(null);
+        areaConexiones.setEditable(false);
+        cargarHubs();
+
+        tablaHubs.getSelectionModel().addListSelectionListener(e -> {
+            int fila = tablaHubs.getSelectedRow();
+            if (fila != -1) {
+                String id = tablaHubs.getValueAt(fila, 0).toString();
+                Estacion hub = controlador.buscarEstacion(id);
+                if (hub != null) {
+                    ListaEnlazada conexiones = hub.getConexiones();
+                    String texto = "Conecta directamente con:\n\n";
+                    for (int i = 0; i < conexiones.getTamaño(); i++) {
+                        Conexion con = (Conexion) conexiones.obtener(i);
+                        texto = texto + "- " + con.getDestino().getNombre() + " (" + con.getTiempoMinutos() + " min)\n";
+                    }
+                    areaConexiones.setText(texto);
+                }
+            }
+        });
+    }
+
+    private void cargarHubs() {
+        ListaEnlazada hubs = controlador.obtenerHubs();
+        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tablaHubs.getModel();
+        modelo.setRowCount(0);
+        areaConexiones.setText("");
+
+        int max = 0;
+        for (int i = 0; i < hubs.getTamaño(); i++) {
+            Estacion est = (Estacion) hubs.obtener(i);
+            max = est.getTamañoConexiones();
+            Object[] fila = {est.getId(), est.getNombre(), est.getLinea(), max};
+            modelo.addRow(fila);
+        }
+        lblMaxConexiones.setText("Maximo de conexiones detectadas: " + max);
     }
 
     /**
@@ -39,7 +72,7 @@ public class VentanaHubs extends javax.swing.JFrame {
         btnActualizar = new javax.swing.JButton();
         btnCerrar = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabel1.setText("Estaciones Principales (Hubs de Conectividad)");
 
@@ -56,7 +89,7 @@ public class VentanaHubs extends javax.swing.JFrame {
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, true, true
+                false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -72,8 +105,10 @@ public class VentanaHubs extends javax.swing.JFrame {
         jScrollPane2.setViewportView(areaConexiones);
 
         btnActualizar.setText("Actualizar");
+        btnActualizar.addActionListener(this::btnActualizarActionPerformed);
 
         btnCerrar.setText("Cerrar");
+        btnCerrar.addActionListener(this::btnCerrarActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -136,30 +171,15 @@ public class VentanaHubs extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+    private void btnActualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActualizarActionPerformed
+        // TODO add your handling code here:
+        cargarHubs();
+    }//GEN-LAST:event_btnActualizarActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new VentanaHubs().setVisible(true));
-    }
+    private void btnCerrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+    }//GEN-LAST:event_btnCerrarActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea areaConexiones;

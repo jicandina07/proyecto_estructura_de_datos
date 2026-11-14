@@ -20,8 +20,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         this.controlador = new ControladorRed();
         this.visualizador = new VisualizadorGrafo();
         this.setLocationRelativeTo(null);
+        javax.swing.JScrollPane scrollMapa = new javax.swing.JScrollPane(visualizador);
+        scrollMapa.setPreferredSize(new java.awt.Dimension(320, 190));
         panelGrafo.setLayout(new java.awt.BorderLayout());
-        panelGrafo.add(visualizador, java.awt.BorderLayout.CENTER);
+        panelGrafo.add(scrollMapa, java.awt.BorderLayout.CENTER);
         areaEstacion.setEditable(false);
     }
 

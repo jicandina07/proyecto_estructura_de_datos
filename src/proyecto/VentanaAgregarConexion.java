@@ -9,14 +9,31 @@ package proyecto;
  * @author josei
  */
 public class VentanaAgregarConexion extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VentanaAgregarConexion.class.getName());
+    private ControladorRed controlador;
+    private VentanaConexiones ventanaConexiones;
+    private VentanaPrincipal principal;
 
-    /**
-     * Creates new form VentanaAgregarConexion
-     */
-    public VentanaAgregarConexion() {
+    public VentanaAgregarConexion(ControladorRed controlador, VentanaConexiones ventanaConexiones, VentanaPrincipal principal) {
         initComponents();
+        this.controlador = controlador;
+        this.ventanaConexiones = ventanaConexiones;
+        this.principal = principal;
+        this.setLocationRelativeTo(null);
+        cargarCombos();
+    }
+
+    private void cargarCombos() {
+        javax.swing.DefaultComboBoxModel modA = new javax.swing.DefaultComboBoxModel();
+        javax.swing.DefaultComboBoxModel modB = new javax.swing.DefaultComboBoxModel();
+        ListaEnlazada estaciones = controlador.getGrafo().getEstaciones();
+        for (int i = 0; i < estaciones.getTamaño(); i++) {
+            Estacion est = (Estacion) estaciones.obtener(i);
+            String texto = est.getId() + " - " + est.getNombre();
+            modA.addElement(texto);
+            modB.addElement(texto);
+        }
+        comboA.setModel(modA);
+        comboB.setModel(modB);
     }
 
     /**
@@ -55,6 +72,7 @@ public class VentanaAgregarConexion extends javax.swing.JFrame {
         btnCancelar.addActionListener(this::btnCancelarActionPerformed);
 
         btnAgregar.setText("Agregar Conexión");
+        btnAgregar.addActionListener(this::btnAgregarActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -115,32 +133,47 @@ public class VentanaAgregarConexion extends javax.swing.JFrame {
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
         // TODO add your handling code here:
+        this.dispose();
     }//GEN-LAST:event_btnCancelarActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        // TODO add your handling code here:
+        if (comboA.getSelectedItem() == null || comboB.getSelectedItem() == null) {
+            return;
         }
-        //</editor-fold>
+        String idA = comboA.getSelectedItem().toString().split(" - ")[0].trim();
+        String idB = comboB.getSelectedItem().toString().split(" - ")[0].trim();
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new VentanaAgregarConexion().setVisible(true));
-    }
+        if (idA.equals(idB)) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Seleccione dos estaciones distintas.");
+            return;
+        }
+
+        int minutos = 0;
+        try {
+            minutos = Integer.parseInt(txtMinutos.getText().trim());
+            if (minutos <= 0) {
+                javax.swing.JOptionPane.showMessageDialog(this, "El tiempo debe ser mayor a 0.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Ingrese un numero valido para los minutos.");
+            return;
+        }
+
+        boolean agregada = controlador.agregarConexion(idA, idB, minutos);
+        if (!agregada) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Esa conexion ya existe.");
+            return;
+        }
+
+        if (ventanaConexiones != null) {
+            ventanaConexiones.cargarCombo();
+            ventanaConexiones.cargarTabla(null);
+        }
+        if (principal != null) principal.actualizarMapa();
+        this.dispose();
+    }//GEN-LAST:event_btnAgregarActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAgregar;
