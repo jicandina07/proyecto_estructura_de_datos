@@ -17,7 +17,6 @@ public class ListaEnlazada<T> {
         this.cabeza = null;
         this.tamaño = 0;
     }
-
     public void agregar(T dato) {
         NodoLista<T> nuevo = new NodoLista<>(dato);
         if (cabeza == null) {
@@ -31,7 +30,12 @@ public class ListaEnlazada<T> {
         }
         tamaño++;
     }
-
+    
+    /**
+    * Retorna el elemento almacenado en la posicion indicada.
+    * @param indice Posicion del elemento a buscar.
+    * @return El dato en esa posicion o null si esta fuera de rango.
+    */
     public T obtener(int indice) {
         if (indice < 0 || indice >= tamaño) {
             return null;

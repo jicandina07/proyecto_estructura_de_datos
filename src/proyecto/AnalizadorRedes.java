@@ -47,9 +47,11 @@ public class AnalizadorRedes {
 
         ListaEnlazada conexiones = grafo.obtenerConexionesDe(actual.getId());
         if (conexiones != null) {
+            // Recorre todas las conexiones directas de la estacion actual para explorar sus vecinos
             for (int i = 0; i < conexiones.getTamaño(); i++) {
                 Conexion conexion = (Conexion) conexiones.obtener(i);
                 Estacion vecino = conexion.getDestino();
+                // Verifica que la estacion vecina no haya sido visitada antes para evitar ciclos infinitos
                 if (!visitados.contiene(vecino.getId())) {
                     dfsRecorrido(grafo, vecino, visitados, subredActual);
                 }
