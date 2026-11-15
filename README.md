@@ -2,6 +2,12 @@
 
 Aplicación de escritorio en Java Swing para gestionar y analizar redes de transporte urbano usando grafos y estructuras de datos propias (sin colecciones de `java.util`).
 
+## Integrantes: 
+    Jose Ignacio Candina
+    
+## Link al repositorio de Github: 
+    https://github.com/jicandina07/proyecto_estructura_de_datos.git
+    
 ## Funcionalidades
 
 * **Carga y guardado en CSV:** Lee y exporta la red usando dos archivos (estaciones y conexiones).
